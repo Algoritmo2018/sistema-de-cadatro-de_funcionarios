@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="utf-8">
+<title>Pesquisa - PHP e MySQL</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<?php
+
+if (isset($_POST['acao'])) {
+
+$nome = addslashes($_POST['nome']);
+
+try {
+
+$pdo = new PDO('mysql:host=localhost;dbname=pesquisa_nome', 'root', '');
+
+} catch(PDOException $ex) {
+echo 'ERRO NA CONEXÃO COM O BANCO: ' . $ex->getMessage();
+exit();
+}
+
+
+$query = 'SELECT * FROM tbl_nomes WHERE nome = :nome';
+
+$pdo = $pdo->prepare($query);
+$pdo->bindValue(':nome', $nome);
+$pdo->execute();
+
+$nomes = [];
+
+if ($pdo->rowCount() > 0) {
+$nomes = $pdo->fetchAll();
+}
+
+}
+
+?>
+
+<h1>Pesquisa por Nome:</h1>
+
+<form method="POST">
+<label for="nome">Nome:</label><br>
+<input type="text" name="nome" id="nome" placeholder="Digite o nome a ser pesquisado" required><br>
+<input type="submit" value="Pesquisar" name="acao">
+</form>
+
+<?php if (isset($nomes) && count($nomes) > 0) : ?>
+
+<br><br>
+
+<table border="1">
+<thead>
+<th>ID</th>
+<th>Nome</th>
+</thead>
+<tbody>
+<?php for ($i = 0; $i < count($nomes); $i++) : ?>
+
+<td><?= $nomes[$i]['id'] ?></td>
+<td><?= $nomes[$i]['nome'] ?></td>
+
+<?php endfor; ?>
+</tbody>
+</table>
+
+<?php endif; ?>
+
+<?php if (isset($nomes) && count($nomes) == 0) : ?>
+
+<p><strong>Nenhum registro corresponde à pesquisa!</strong></p>
+
+<?php endif; ?>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+CREATE DATABASE pesquisa_nome;
+
+USE pesquisa_nome;
+
+CREATE TABLE tbl_nomes (
+id int(11) PRIMARY KEY AUTO_INCREMENT,
+nome varchar(100) NOT NULL
+)
+
+
+INSERT INTO tbl_nomes (id, nome) VALUES
+(1, 'Maria'),
+(2, 'Roberto');
+
+
+
+
+
+
+
+
